@@ -3,9 +3,13 @@ import bcrypt from 'bcrypt';
 import {} from 'express-async-errors';
 import * as userRepository from '../data/auth.js';
 
+// 문제 상황
+ // jwt 토큰 만료가 3일보다 빨리됨 -> 코드를 새로고침 하면 만 jwt 토큰이 만료됨
+ // Post, Get 요청시 Internal server에러가 발생
+
 // TODO: Make it secure!
 const jwtSecretKey = 'F2dN7x8HVzBWaQuEEDnhsvHXRWqAR63z';
-const jwtExpiresInDays = '2d';
+const jwtExpiresInDays = '3d';
 const bcryptSaltRounds = 10;
 
 export async function signup(req, res) {
@@ -22,6 +26,8 @@ export async function signup(req, res) {
     email,
     url,
   });
+  //debug
+  console.log("signup in"+userId)
   
   const token = createJwtToken(userId);
   res.status(201).json({ token, username });
@@ -38,6 +44,8 @@ export async function login(req, res) {
   if (!isValidPassword) {
     return res.status(401).json({ message: 'Invalid user or password' });
   }
+    //debug
+    console.log("login in" + user.id)
 
   const token = createJwtToken(user.id);
   res.status(200).json({ token, username });

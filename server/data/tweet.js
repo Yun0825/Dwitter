@@ -18,10 +18,12 @@ let tweets = [
 export async function getAll(){
     return Promise.all(
         tweets.map(async (tweet) => {
-            const {username, name, url} = await userRepository.findById(tweet.userId);
-            return {...tweet, username, name, url}
+          const { username, name, url } = await userRepository.findById(
+            tweet.userId
+          );
+          return { ...tweet, username, name, url };
         })
-    );
+      );
 }
 
 export async function getAllByUsername(username){
@@ -34,13 +36,13 @@ export async function getAllById(id){
         return null;
     }
 
-    const {username, name, url} = await userRepository.findById(id);
+    const {username, name, url} = await userRepository.findById(found.userId);
     return {...found, username, name, url}
 }
 
 export async function create(text, userId){
     const tweet = {
-        id : new Date().toString(),
+        id : Date.now().toString(),
         text,
         createdAt : new Date(),
         userId
