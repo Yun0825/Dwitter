@@ -2,15 +2,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import {} from 'express-async-errors';
 import * as userRepository from '../data/auth.js';
+import { config } from '../config.js';
 
-// 문제 상황
- // jwt 토큰 만료가 3일보다 빨리됨 -> 코드를 새로고침 하면 만 jwt 토큰이 만료됨
- // Post, Get 요청시 Internal server에러가 발생
-
-// TODO: Make it secure!
-const jwtSecretKey = 'F2dN7x8HVzBWaQuEEDnhsvHXRWqAR63z';
-const jwtExpiresInDays = '3d';
-const bcryptSaltRounds = 10;
+console.log(config)
 
 export async function signup(req, res) {
   const { username, password, name, email, url } = req.body;
@@ -18,7 +12,7 @@ export async function signup(req, res) {
   if (found) {
     return res.status(409).json({ message: `${username} already exists` });
   }
-  const hashed = await bcrypt.hash(password, bcryptSaltRounds);
+  const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
   const userId = await userRepository.createUser({
     username,
     password: hashed,
@@ -26,8 +20,6 @@ export async function signup(req, res) {
     email,
     url,
   });
-  //debug
-  console.log("signup in"+userId)
   
   const token = createJwtToken(userId);
   res.status(201).json({ token, username });
@@ -52,7 +44,7 @@ export async function login(req, res) {
 }
 
 function createJwtToken(id) {
-  return jwt.sign({ id }, jwtSecretKey, { expiresIn: jwtExpiresInDays });
+  return jwt.sign({ id }, config.jwt.secretkey, { expiresIn: config.jwt.expiresInSec });
 }
 
 export async function me(req, res, next) {
