@@ -11,6 +11,9 @@ class Socket {
     });
 
     this.io.use((socket, next) => {
+      // const token = socket.handshake.query && socket.handshake.query.token;
+      // Front에서 query에 토큰을 넘겨주는 코드 -> 보안에 취약함
+
       const token = socket.handshake.auth.token;
       if (!token) {
         return next(new Error('Authentication error'));
@@ -35,9 +38,11 @@ export function initSocket(server) {
     socket = new Socket(server);
   }
 }
+
 export function getSocketIO() {
   if (!socket) {
     throw new Error('Please call init first');
   }
+
   return socket.io;
 }
